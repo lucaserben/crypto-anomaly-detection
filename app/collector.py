@@ -47,15 +47,14 @@ def on_message(ws, message):
     recent_prices.append(trade_data["price"])
     recent_quantities.append(trade_data["quantity"])
 
-   if anomalies:
+    if anomalies:
+     print(f"Anomalies detected for trade: {anomalies}")
 
-    print(f"Anomalies detected for trade: {anomalies}")
-
-    for anomaly in anomalies:
-        insert_anomalous_trade(
+     for anomaly in anomalies:
+         insert_anomalous_trade(
             trade_data,
             anomaly
-        )
+            )
 
 def start_collector(url, run_in_thread=True):
 
