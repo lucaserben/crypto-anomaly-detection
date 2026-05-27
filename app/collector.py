@@ -7,6 +7,7 @@ from collections import deque
 from app.parser import parser_trade_message
 from app.anomalies import detect_anomalies
 import inspect
+import json
 
 # Determine at import-time whether the anomalies function accepts recent_quantities
 _detect_anomalies_params = len(inspect.signature(detect_anomalies).parameters)
@@ -15,6 +16,16 @@ _detect_anomalies_accepts_quantities = _detect_anomalies_params >= 4
 recent_trade_values = deque(maxlen=100)
 recent_prices = deque(maxlen=100)
 recent_quantities = deque(maxlen=100)
+
+
+def round_numbers(obj, ndigits=2):
+    if isinstance(obj, dict):
+        return {k: round_numbers(v, ndigits) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [round_numbers(v, ndigits) for v in obj]
+    if isinstance(obj, float):
+        return round(obj, ndigits)
+    return obj
 
 
 def on_open(ws):
@@ -31,6 +42,7 @@ def on_error(ws, error):
 
 def on_message(ws, message):
     trade_data = parser_trade_message(message)
+
     if _detect_anomalies_accepts_quantities:
         anomalies = detect_anomalies(
             trade_data,
@@ -46,17 +58,16 @@ def on_message(ws, message):
     recent_quantities.append(trade_data["quantity"])
 
     if anomalies:
-        print(f"Anomalies detected for trade: {anomalies}")
+        nice = round_numbers(anomalies, 2)
+        print("Anomalies detected for trade:")
+        print(json.dumps(nice, default=str, indent=2))
+        print("Trade:", json.dumps(round_numbers(trade_data, 2), default=str))
+
+       
 
 
 def start_collector(url, run_in_thread=True):
-    """Start the WebSocket collector.
 
-    If `run_in_thread` is True the WebSocket loop runs in a daemon thread
-    so it does not block the caller.
-    Returns a tuple `(ws, thread)` when threaded, or `(ws, None)` when
-    run in the foreground.
-    """
     ws = WebSocketApp(
         url, on_open=on_open, on_message=on_message, on_error=on_error, on_close=on_close
     )
