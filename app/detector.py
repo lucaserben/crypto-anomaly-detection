@@ -1,16 +1,6 @@
 import numpy as np
+from app.config import MIN_WINDOW_SIZE, PRICE_Z_SCORE_THRESHOLD, QUANTITY_Z_SCORE_THRESHOLD, WHALE_FIX_TRESHOLD, WHALE_Z_SCORE_THRESHOLD
 
-min_window_size = 30
-
-# whales
-whale_fix_treshold = 10000000
-whale_z_score_treshold = 5
-
-# price anomaly
-price_z_score_threshold = 3
-
-# volume spike
-quantity_z_score_threshold = 3
 
 #######################################################################################
 
@@ -29,7 +19,7 @@ def detect_price_anomaly(trade, recent_prices):
 
     anomalies = []
 
-    if len(recent_prices) < min_window_size:
+    if len(recent_prices) < MIN_WINDOW_SIZE:
         return anomalies
 
     price = trade["price"]
@@ -39,7 +29,7 @@ def detect_price_anomaly(trade, recent_prices):
         recent_prices
     )
 
-    if abs(z_score) >= price_z_score_threshold:
+    if abs(z_score) >= PRICE_Z_SCORE_THRESHOLD:
 
         anomalies.append({
             "type": "price_anomaly",
@@ -55,7 +45,7 @@ def detect_volume_spike_anomaly(trade, recent_quantities):
 
     anomalies = []
 
-    if len(recent_quantities) < min_window_size:
+    if len(recent_quantities) < MIN_WINDOW_SIZE:
         return anomalies
 
     quantity = trade["quantity"]
@@ -65,7 +55,7 @@ def detect_volume_spike_anomaly(trade, recent_quantities):
         recent_quantities
     )
 
-    if z_score >= quantity_z_score_threshold:
+    if z_score >= QUANTITY_Z_SCORE_THRESHOLD:
 
         anomalies.append({
             "type": "volume_spike_anomaly",
@@ -83,7 +73,7 @@ def detect_whale_trade(trade, recent_trade_values):
 
     trade_value = trade["trade_value"]
 
-    if trade_value >= whale_fix_treshold:
+    if trade_value >= WHALE_FIX_TRESHOLD:
 
         anomalies.append({
             "type": "whale_trade_fixed",
@@ -91,7 +81,7 @@ def detect_whale_trade(trade, recent_trade_values):
             "details": "Trade value exceeds fixed whale threshold"
         })
 
-    if len(recent_trade_values) < min_window_size:
+    if len(recent_trade_values) < MIN_WINDOW_SIZE:
         return anomalies
 
     z_score = calculator_z_score(
@@ -99,7 +89,7 @@ def detect_whale_trade(trade, recent_trade_values):
         recent_trade_values
     )
 
-    if z_score >= whale_z_score_treshold:
+    if z_score >= WHALE_Z_SCORE_THRESHOLD:
 
         anomalies.append({
             "type": "whale_trade_statistical",

@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine
 from streamlit_autorefresh import st_autorefresh
-
+from app.config import DATABASE_URL
 st.set_page_config(
     page_title="Crypto Anomaly Detection Dashboard",
     layout="wide"
@@ -13,10 +13,7 @@ st_autorefresh(
     key="anomaly_refresh"
 )
 
-DATABASE_URL = (
-    "postgresql+psycopg2://"
-    "postgres:postgres@localhost:5432/crypto_db"
-)
+
 
 engine = create_engine(DATABASE_URL)
 

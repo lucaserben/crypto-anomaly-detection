@@ -1,9 +1,8 @@
 from sqlalchemy import create_engine, text
+from app.config import DATABASE_URL
 
 
-database_url = ( "postgresql+psycopg2://"
-    "postgres:postgres@localhost:5432/crypto_db")
-engine = create_engine(database_url)
+engine = create_engine(DATABASE_URL)
 
 def insert_anomalous_trade(trade, anomaly):
 
