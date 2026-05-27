@@ -3,11 +3,11 @@ import threading
 import time
 from websocket import WebSocketApp
 from collections import deque
-
+from app.database import insert_anomalous_trade
 from app.parser import parser_trade_message
 from app.anomalies import detect_anomalies
 import inspect
-import json
+
 
 # Determine at import-time whether the anomalies function accepts recent_quantities
 _detect_anomalies_params = len(inspect.signature(detect_anomalies).parameters)
@@ -16,16 +16,6 @@ _detect_anomalies_accepts_quantities = _detect_anomalies_params >= 4
 recent_trade_values = deque(maxlen=100)
 recent_prices = deque(maxlen=100)
 recent_quantities = deque(maxlen=100)
-
-
-def round_numbers(obj, ndigits=2):
-    if isinstance(obj, dict):
-        return {k: round_numbers(v, ndigits) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [round_numbers(v, ndigits) for v in obj]
-    if isinstance(obj, float):
-        return round(obj, ndigits)
-    return obj
 
 
 def on_open(ws):
@@ -57,14 +47,15 @@ def on_message(ws, message):
     recent_prices.append(trade_data["price"])
     recent_quantities.append(trade_data["quantity"])
 
-    if anomalies:
-        nice = round_numbers(anomalies, 2)
-        print("Anomalies detected for trade:")
-        print(json.dumps(nice, default=str, indent=2))
-        print("Trade:", json.dumps(round_numbers(trade_data, 2), default=str))
+   if anomalies:
 
-       
+    print(f"Anomalies detected for trade: {anomalies}")
 
+    for anomaly in anomalies:
+        insert_anomalous_trade(
+            trade_data,
+            anomaly
+        )
 
 def start_collector(url, run_in_thread=True):
 
