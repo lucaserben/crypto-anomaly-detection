@@ -1,11 +1,15 @@
+import os
 import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine
 from streamlit_autorefresh import st_autorefresh
+from dotenv import load_dotenv
 
-DATABASE_URL = (
-    "postgresql+psycopg2://"
-    "postgres:postgres@localhost:5432/crypto_db"
+load_dotenv()
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg2://postgres:postgres@localhost:5433/crypto_db"
 )
 
 st.set_page_config(

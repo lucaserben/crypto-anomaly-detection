@@ -1,7 +1,14 @@
-SYMBOL = "btcusdt"
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SYMBOL = os.getenv("SYMBOL", "btcusdt")
 BINANCE_URL = f"wss://stream.binance.com:9443/ws/{SYMBOL}@trade"
-DATABASE_URL = ( "postgresql+psycopg2://"
-    "postgres:postgres@localhost:5432/crypto_db")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg2://postgres:postgres@localhost:5433/crypto_db"
+)
 
 MIN_WINDOW_SIZE = 30
 
